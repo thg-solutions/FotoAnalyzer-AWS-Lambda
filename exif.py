@@ -9,15 +9,21 @@ def get_exif_data(image):
               'make': Base.Make,
               'model': Base.Model}
     for field in fields:
-        result[field] = exif[fields.get(field)]
+        value = fields.get(field)
+        if value == Base.DateTime:
+            result[field] = to_local_datetime(exif[value])
+        else:
+            result[field] = exif[value]
+
     return result
 
 def get_gps_data(image):
     gps_ifd = image.getexif().get_ifd(IFD.GPSInfo)
     fields = { 'latitude': GPS.GPSLatitude, 'longitude': GPS.GPSLongitude}
     result = {}
-    for field in fields:
-        result[field] = to_decimal_degrees(gps_ifd[fields.get(field)])
+    if gps_ifd != {}:
+        for field in fields:
+            result[field] = to_decimal_degrees(gps_ifd[fields.get(field)])
     return result
 
 def to_decimal_degrees(x):

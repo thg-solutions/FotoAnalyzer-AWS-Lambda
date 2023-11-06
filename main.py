@@ -1,32 +1,36 @@
 import fn
 import exif
 from pymongo import MongoClient
-from PIL import Image as img
-from PIL.ExifTags import Base
-
-directory = "directory"
-
-#files = glob.glob(directory)
+import glob
+import os
 
 filename = "20231029_141414.jpg"
 file = "/home/tom/Bilder/Uwe_und_Familie.jpg"
 
+myclient = MongoClient("mongodb://localhost:27017/")
+mydb = myclient["pythontest"]
+mycol = mydb["image"]
+
 x = fn.is_valid_File(filename)
-imagedata = exif.get_image_data(file)
+imagedata = exif.get_image_data('/home/tom/Bilder/Test/20160126_081152.jpg')
 imagedata['filename'] = file
-print(imagedata)
 
-# myclient = MongoClient("mongodb://localhost:27017/")
-# mydb = myclient["pythontest"]
-# mycol = mydb["image"]
-# #mycol.insert_one(imagedata)
-# for i in mycol.find():
-#     print(i)
+def rename_images(directory_list: list[str]):
+    images: list[str] = []
+    result = []
+    for i in directory_list:
+        images += glob.glob(i + '/*.jpg')
+        images += glob.glob(i + '/*.JPG')
+    for image in images:
+        imagedata = exif.get_image_data(image)
+        head, tail = os.path.split(image)
+        if not fn.is_valid_File(tail):
+            tail = fn.create_filename_from_datetime(imagedata.get('creationDate'))
+            os.rename(image, os.path.join(head, tail))
+        imagedata['filename'] = tail
+        mycol.delete_one({'creationDate': imagedata.get('creationDate')})
+        mycol.insert_one(imagedata)
+        result.append(imagedata)
+    return result
 
-# image = img.open(file)
-# exif = image.getexif()
-# for i in Base:
-#     if i.value in exif.keys():
-#         print(i, exif[i])
-# print(exif[Base.Model])
-
+imagedatalist = rename_images(['/home/tom/Bilder/Gardasee_2 (Kopie)'])
