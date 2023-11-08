@@ -2,8 +2,13 @@ from PIL import Image as img
 from PIL.ExifTags import IFD, Base, GPS
 from datetime import datetime
 
+class MissingExifDataException(Exception):
+    pass
+
 def get_exif_data(image):
     exif = image.getexif()
+    if not exif.get(Base.DateTime):
+        raise MissingExifDataException
     result = {}
     fields = { 'creationDate': Base.DateTime,
               'make': Base.Make,
@@ -36,6 +41,9 @@ def to_local_datetime(datestring):
 def get_image_data(file):
     result = {}
     image = img.open(file)
-    result.update(get_exif_data(image))
-    result.update(get_gps_data(image))
+    try:
+        result.update(get_exif_data(image))
+        result.update(get_gps_data(image))
+    except MissingExifDataException:
+        result['image metadata'] = 'Not available'
     return result
