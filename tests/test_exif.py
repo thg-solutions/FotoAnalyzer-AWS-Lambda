@@ -4,13 +4,15 @@ from datetime import datetime
 
 class ExifTest(unittest.TestCase):
 
-    def setUpClass(self):
-        self.imagedata = get_image_data("/home/tom/Bilder/Uwe_und_Familie.jpg")
+    @classmethod
+    def setUpClass(cls):
+        cls.imagedata = get_image_data("/home/tom/Bilder/Uwe_und_Familie.jpg")
 
     def test_creationdate(self):
-        dt = datetime.strptime(self.imagedata.get('creationDate'), '%Y-%m-%dT%H:%M:%S')
+        dt = self.imagedata.get('creationDate')
         self.assertIsInstance(dt, datetime)
-        self.assertRegexpMatches(dt.strftime('%Y%m%d_%H%M%S'), '\\d{8}_\\d{6}')
+        if isinstance(dt, datetime):
+            self.assertRegex(dt.strftime('%Y%m%d_%H%M%S'), '\\d{8}_\\d{6}')
 
     def test_gps_location(self):
         latitude = self.imagedata.get('latitude')

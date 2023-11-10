@@ -14,4 +14,4 @@ class FilenameTest(unittest.TestCase):
     def test_create_filename(self):
         dt = datetime(2023, 11, 2, 9, 57)
         filename = create_filename_from_datetime(dt)
-        self.assertEquals(filename, '20231102_095700.jpg')
+        self.assertEqual(filename, '20231102_095700.jpg')
