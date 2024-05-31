@@ -1,5 +1,5 @@
 ## Repository
-zur Zeit nur lokal.
+Probehalber public, aber noch nicht auf "Herz und Nieren" getestet.
 
 ## Swagger-UI
 http://localhost:8000/docs
